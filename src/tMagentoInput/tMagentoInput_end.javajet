@@ -1,0 +1,32 @@
+<%@ jet 
+imports="
+    	org.talend.core.model.process.INode 
+    	org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.metadata.IMetadataTable 
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.EConnectionType
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType		
+		org.talend.core.model.process.IConnectionCategory
+		"
+%>
+<%
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode)codeGenArgument.getArgument();
+	String cid = node.getUniqueName();
+	
+	String mageReadOnly = ElementParameterParser.getValue(node,"__ONLY-READ__");
+	
+	String mageQueryOnly = ElementParameterParser.getValue(node,"__ONLY-QUERY__");
+%>       
+<%	
+	if(mageReadOnly.equals("true")){
+%>
+			nb_line_<%=cid %>++;
+		}
+		globalMap.put("<%=cid %>_NB_LINE",nb_line_<%=cid %>); 
+<%
+	}
+%>

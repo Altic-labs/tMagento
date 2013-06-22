@@ -1,0 +1,57 @@
+<%@ jet 
+imports="
+    	org.talend.core.model.process.INode 
+    	org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.metadata.IMetadataTable 
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.EConnectionType
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType		
+		java.util.List
+		java.util.Map
+		org.talend.core.model.process.IConnectionCategory
+		java.util.HashMap
+		"
+%>
+<%
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode)codeGenArgument.getArgument();
+	String cid = node.getUniqueName();
+	
+	String sessionLabel = ElementParameterParser.getValue(node, "__SESSION-NAME__");
+	
+	String url = ElementParameterParser.getValue(node, "__MAGENTO-URL__");
+
+	String username = ElementParameterParser.getValue(node, "__USERNAME__");
+	String password = ElementParameterParser.getValue(node, "__PASSWORD__");
+	String module = ElementParameterParser.getValue(node, "__MODULENAME__");
+	
+%>
+	// magento session variables 
+	String magentoSessionId<%=cid%>;
+	org.altic.magentojconnector.service.Session magentoSession<%=cid%>;
+	
+	magentoSession<%=cid%> = new org.altic.magentojconnector.service.impl.SessionImpl(
+		<%=url%>
+	);
+	
+	// open a magento session if needed
+	magentoSessionId<%=cid%>  = (String)globalMap.get("_MAGENTO_SESSION_ID");
+	
+	if(magentoSessionId<%=cid%> != null && !"".equals(magentoSessionId<%=cid%>)){
+		magentoSession<%=cid%>.setSession(magentoSessionId<%=cid%>);
+	}else{
+	
+		magentoSessionId<%=cid%>  = magentoSession<%=cid%>.open(<%=username%>,<%=password%>);
+		globalMap.put("_MAGENTO_SESSION_ID",magentoSessionId<%=cid%>);
+	}		
+		
+	// create service
+	org.altic.magentojconnector.service.InputOperation magentoService<%=cid%> = new org.altic.magentojconnector.service.impl.InputOperationImpl(
+		magentoSession<%=cid%>
+	);
+	
+	globalMap.put("magentoService<%=cid%>",magentoService<%=cid%>);
+	globalMap.put("magentoSessionId<%=cid%>",magentoSessionId<%=cid%>); 

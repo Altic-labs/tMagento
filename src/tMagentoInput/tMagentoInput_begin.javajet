@@ -1,0 +1,232 @@
+<%@ jet 
+imports="
+    	org.talend.core.model.process.INode 
+    	org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.metadata.IMetadataTable 
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.EConnectionType
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType		
+		java.util.List
+		java.util.Map
+		org.talend.core.model.process.IConnectionCategory
+		java.util.HashMap
+		"
+%>
+<%
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode)codeGenArgument.getArgument();
+	String cid = node.getUniqueName();
+	List<Map<String, String>> condition = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node,"__FILTER__");
+	
+	String url = ElementParameterParser.getValue(node, "__MAGENTO-URL__");
+
+	String username = ElementParameterParser.getValue(node, "__USERNAME__");
+	String password = ElementParameterParser.getValue(node, "__PASSWORD__");
+
+	String calltype = ElementParameterParser.getValue(node, "__CALLTYPE__");
+	String mageId = ElementParameterParser.getValue(node, "__ID__");
+	String storeView = ElementParameterParser.getValue(node, "__STORE-VIEW__");
+
+	String module = ElementParameterParser.getValue(node, "__MODULENAME__");
+	
+	String useExistingSession = ElementParameterParser.getValue(node,"__USE_EXISTING_SESSION__");
+	
+	String mageReadOnly = ElementParameterParser.getValue(node,"__ONLY-READ__");
+	
+	String mageQueryOnly = ElementParameterParser.getValue(node,"__ONLY-QUERY__");
+	
+	List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
+	
+	String operation[];
+	String operationName;
+	String operationRetType;
+%>
+<%
+	List<IMetadataTable> metadatas = node.getMetadataList();
+	if ((metadatas!=null)&&(metadatas.size()>0)) {
+		IMetadataTable metadata = metadatas.get(0);
+		if (metadata!=null) {    
+			operation = module.split("\\|");
+			operationName = operation[0];
+			operationRetType = operation[1];
+%>
+		int nb_line_<%=cid%> = 0;
+		
+<%		
+		if(useExistingSession.equals("true")) {
+			String session = ElementParameterParser.getValue(node,"__MAGE-SESSION__");
+			String sess = "magentoService" + session;
+%>
+			// retrive a session & service <%=sess%>
+			org.altic.magentojconnector.service.InputOperation magentoService<%=cid%> = (org.altic.magentojconnector.service.InputOperation) globalMap.get("<%=sess%>");
+			org.altic.magentojconnector.service.Session magentoSession<%=cid%> = magentoService<%=cid%>.getInSession();
+			String magentoSessionId<%=cid%> = magentoSession<%=cid%>.getSession();
+			globalMap.put("_MAGENTO_SESSION_ID",magentoSessionId<%=cid%>);			
+<%
+		} else {
+%>
+			org.altic.magentojconnector.service.Session magentoSession<%=cid%> = new org.altic.magentojconnector.service.impl.SessionImpl(
+				<%=url%>
+			);
+			
+			// open a session
+			String magentoSessionId<%=cid%> = (String)globalMap.get("_MAGENTO_SESSION_ID"); 
+			if (magentoSessionId<%=cid%> == null) {
+			
+				magentoSessionId<%=cid%>  = magentoSession<%=cid%>.open(<%=username%>,<%=password%>);		
+				globalMap.put("_MAGENTO_SESSION_ID",magentoSessionId<%=cid%>); 
+			}
+			else {
+				magentoSession<%=cid%>.setSession(magentoSessionId<%=cid%>);
+			}
+			
+			// create service
+			org.altic.magentojconnector.service.InputOperation magentoService<%=cid%> = new org.altic.magentojconnector.service.impl.InputOperationImpl(
+			magentoSession<%=cid%>
+		);
+<%
+		}// end iff useExistingSession
+%>
+		java.util.ArrayList<String> meta<%=cid%> = new java.util.ArrayList();   
+<%
+		//get the select fields from schema
+		List<IMetadataColumn> columnsFields=metadata.getListColumns();
+		for (int i=0;i < columnsFields.size();i++) {
+			IMetadataColumn column=columnsFields.get(i);
+%>
+			meta<%=cid%>.add("<%=column.getLabel() %>");
+<%
+		}
+		
+		if(mageQueryOnly.equals("true")){
+%>
+		//parameter of operation
+		org.altic.magentojconnector.magento.api.Filters magentoFilters<%=cid%>;
+<%		
+		if(condition.size() > 0 ){ // Test filters
+%>		
+			//Build array of paramters
+			magentoFilters<%=cid%> = new org.altic.magentojconnector.magento.api.Filters();
+			org.altic.magentojconnector.magento.api.ComplexFilter[] complex_filter<%=cid%> = new org.altic.magentojconnector.magento.api.ComplexFilter[<%=condition.size()%>];
+			magentoFilters<%=cid%>.setComplex_filter(complex_filter<%=cid%>);
+			org.altic.magentojconnector.magento.api.AssociativeEntity assocFilter<%=cid%>;
+		
+<% 
+			String operande;
+			String prefix = "";
+			String suffix = "";
+			Map<String, String> line;
+			for (int idxCnd = 0; idxCnd < condition.size(); idxCnd++) {
+				
+				line = condition.get(idxCnd);
+				operande = "";
+				if("CONTAINS".equals(line.get("OPERATION"))){
+					operande = "like";
+					prefix = "%";
+					suffix = "%";
+				}if("NOTCONTAINS".equals(line.get("OPERATION"))){
+					operande = "nlike";
+					prefix = "%";
+					suffix = "%";
+				}else if("STARTSWITH".equals(line.get("OPERATION"))){
+					operande = "like";
+					prefix = "%";
+				}else if("ENDWITH".equals(line.get("OPERATION"))){
+					operande = "like";
+					suffix = "%";					
+				}else if("EQUAL".equals(line.get("OPERATION"))){
+					operande = "eq";
+				}else if("NOTEQUAL".equals(line.get("OPERATION"))){
+					operande = "neq";
+				}else if("IS".equals(line.get("OPERATION"))){
+					operande = "is";
+				}else if("NOTIS".equals(line.get("OPERATION"))){
+					operande = "nis";
+				}else if("INSET".equals(line.get("OPERATION"))){
+					operande = "in";
+				}else if("NOTINSET".equals(line.get("OPERATION"))){
+					operande = "nin";
+				}else if("FROMRANGE".equals(line.get("OPERATION"))){
+					operande = "from";
+				}else if("TORANGE".equals(line.get("OPERATION"))){
+					operande = "to";
+				}else if("LESSTHAN".equals(line.get("OPERATION"))){
+					operande = "lt";
+				}else if("LESSTHANOREQUAL".equals(line.get("OPERATION"))){
+					operande = "lteq";
+				}else if("GREATERTHAN".equals(line.get("OPERATION"))){
+					operande = "gt";
+				}else if("GREATERTHANOREQUAL".equals(line.get("OPERATION"))){
+					operande = "gteq";
+				}else if("REGEXP".equals(line.get("OPERATION"))){
+					operande = "regexp";
+				}
+%>
+				//Fileter <%= line.get("NAME") %> <%= operande %> <%= line.get("VALUE") %> <%=line.get("OPERATION")%>
+				assocFilter<%=cid%> = new org.altic.magentojconnector.magento.api.AssociativeEntity("<%=operande%>",  "<%=prefix%>" + <%= line.get("VALUE")%> + "<%=suffix%>") ;
+				complex_filter<%=cid%>[<%=idxCnd%>] = new org.altic.magentojconnector.magento.api.ComplexFilter("<%= line.get("NAME") %>", assocFilter<%=cid%>);
+<%
+			}// end for condition
+		}else{
+%>
+			//Build array of paramters
+			magentoFilters<%=cid%> = null;			
+<%
+		}// end of  filters
+%>
+		
+		String[] attributes<%=cid%> = null;
+		
+		// set up all kind of parameter
+		magentoService<%=cid%>.setFilters(magentoFilters<%=cid%>);
+		magentoService<%=cid%>.setAttributes(attributes<%=cid%>);
+		magentoService<%=cid%>.setId(<%=(mageId != null && mageId.length() > 0) ? mageId : "null" %>);
+		magentoService<%=cid%>.setStoreView(<%=(storeView != null && storeView.length() > 0) ? storeView : "null" %>);
+		
+		// read
+		magentoService<%=cid%>.read<%=operationName%>();
+<%
+		} // end iff mageQueryOnly
+		
+		if(mageReadOnly.equals("true")){
+			if(operationRetType.indexOf("[]") > 0) {
+%>
+				// getter
+				org.altic.magentojconnector.magento.api.<%=operationRetType%> magentoResults<%=cid%> = magentoService<%=cid%>.get<%=operationName%>();	
+<%
+			}else{
+%>
+				// getter
+				org.altic.magentojconnector.magento.api.<%=operationRetType%>[] magentoResults<%=cid%> = new org.altic.magentojconnector.magento.api.<%=operationRetType%>[1];
+				magentoResults<%=cid%>[0] = magentoService<%=cid%>.get<%=operationName%>();
+<%
+			} // end iff operationRetType
+%>	
+			for(int magento<%=cid%>_idx  = 0;   magento<%=cid%>_idx < magentoResults<%=cid%>.length ; magento<%=cid%>_idx++){
+<%
+				// Get returns value
+				if(conns!=null){
+					if (conns.size()>0){
+						IConnection conn =conns.get(0);
+						if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+							List<IMetadataColumn> columns = metadata.getListColumns();
+							int sizeColumns = columns.size();
+							for (int j = 0; j < sizeColumns; j++) {
+								IMetadataColumn column = columns.get(j);
+%>							
+								<%=conn.getName() %>.<%=column.getLabel() %>=magentoResults<%=cid%>[magento<%=cid%>_idx].get<%=column.getLabel().substring(0, 1).toUpperCase() + column.getLabel().substring(1,column.getLabel().length()) %>();
+<%							}
+						}
+					}
+				}
+		}// end iff mageReadOnly
+%>	
+
+		//}
+<%
+		}// end iff  (metadata!=null)
+	} // end iff ((metadatas!=null)&&(metadatas.size()>0))
+%>

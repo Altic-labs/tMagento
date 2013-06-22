@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This file is part of tMagento
+   
+   Copyright (C) 2004 - 2013 Altic sarl - http://altic.org
+  
+   contact : opensource @ altic . org
+   
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+   
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+   
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  
+   Contributors:
+    - Charly Clairmont (charly . clairmont @ altic . org) 
+    - Sebastien Vanotti (sebastien . vanotti @ altic . org)
+-->
+<COMPONENT>
+
+  <HEADER
+    PLATEFORM="ALL"
+    SERIAL=""
+    VERSION="0.102"
+    STATUS="ALPHA"
+    
+    COMPATIBILITY="ALL"
+    AUTHOR="Altic"
+    RELEASE_DATE="20090703A"
+    STARTABLE="true"
+  >
+    <SIGNATURE/>
+  </HEADER>
+  
+  <FAMILIES> 
+    <FAMILY>Business/MagentoCommerce</FAMILY> 
+  </FAMILIES>
+  
+  <DOCUMENTATION>
+    <URL>http://www.altic.org</URL> 
+  </DOCUMENTATION>
+
+  <CONNECTORS>
+    <CONNECTOR CTYPE="FLOW" MAX_INPUT="0" MAX_OUTPUT="5"/>
+    <CONNECTOR CTYPE="ITERATE" MAX_OUTPUT="1" MAX_INPUT="1"/>
+    <CONNECTOR CTYPE="SUBJOB_OK" MAX_INPUT="1" />
+    <CONNECTOR CTYPE="SUBJOB_ERROR" MAX_INPUT="1" />
+    <CONNECTOR CTYPE="COMPONENT_OK"/>
+    <CONNECTOR CTYPE="COMPONENT_ERROR"/>
+    <CONNECTOR CTYPE="RUN_IF"/>
+  </CONNECTORS>
+
+  <PARAMETERS>
+  
+  	<PARAMETER
+	      NAME="USE_EXISTING_SESSION"
+	      FIELD="CHECK"
+	      NUM_ROW="1"
+	/>
+	<PARAMETER
+	      NAME="MAGE-SESSION"
+	      FIELD="COMPONENT_LIST"
+	      FILTER="tMagentoSession"
+	      NUM_ROW="1"
+	      SHOW_IF="USE_EXISTING_SESSION == 'true'"
+	/>
+	<PARAMETER
+	      NAME="MAGENTO-URL"
+	      FIELD="TEXT"
+	      NUM_ROW="2"
+	      REQUIRED="true" SHOW_IF="USE_EXISTING_SESSION == 'false'"
+	    >
+	      <DEFAULT>"http://127.0.0.1/magento"</DEFAULT>
+	 </PARAMETER>
+	    
+	  <PARAMETER
+	      NAME="USERNAME"
+	      FIELD="TEXT"
+	      NUM_ROW="3"
+	      REQUIRED="true" SHOW_IF="USE_EXISTING_SESSION == 'false'"
+	    >
+	      <DEFAULT>"admin"</DEFAULT>
+	    </PARAMETER>
+	    
+	    <PARAMETER
+	      NAME="PASSWORD"
+	      FIELD="TEXT"
+	      NUM_ROW="3"
+	      REQUIRED="true" SHOW_IF="USE_EXISTING_SESSION == 'false'"
+	    >
+	      <DEFAULT>"password"</DEFAULT>
+	    </PARAMETER>
+	    
+	    <PARAMETER NAME="MODULENAME" FIELD="CLOSED_LIST" NUM_ROW="4" REQUIRED="true">
+	      <ITEMS DEFAULT="Orders">
+	      	<ITEM NAME="Customer" VALUE="Customer|CustomerCustomerEntity"/>
+			<ITEM NAME="Customers" VALUE="Customers|CustomerCustomerEntity[]"/>
+			<ITEM NAME="CustomerAddress" VALUE="CustomerAddress|CustomerAddressEntity"/>
+			<ITEM NAME="Order" VALUE="Order|SalesOrderEntity"/>
+			<ITEM NAME="OrderAddress" VALUE="OrderAddress|SalesOrderAddressEntity[]"/>
+			<ITEM NAME="OrderItems" VALUE="OrderItems|SalesOrderItemEntity[]"/>			
+			<ITEM NAME="Orders" VALUE="Orders|SalesOrderEntity[]"/>
+			<ITEM NAME="OrderPayment" VALUE="OrderPayment|SalesOrderPaymentEntity"/>
+			<ITEM NAME="OrderHistories" VALUE="OrderHistories|SalesOrderStatusHistoryEntity"/>
+			<ITEM NAME="Products" VALUE="Products|CatalogProductEntity[]"/>
+			<ITEM NAME="Regions" VALUE="Regions|DirectoryRegionEntity[]"/>
+			<ITEM NAME="Countries" VALUE="Countries|DirectoryCountryEntity[]"/>
+	       </ITEMS>
+	    </PARAMETER>
+	    
+	     <PARAMETER
+	      NAME="ONLY-QUERY"
+	      FIELD="CHECK"
+	      NUM_ROW="4"
+	      />
+	    <PARAMETER
+	      NAME="ONLY-READ"
+	      FIELD="CHECK"
+	      NUM_ROW="4"
+	      />
+	   <PARAMETER NAME="FILTER" FIELD="TABLE" NUM_ROW="5" NB_LINES="3" 
+	   SHOW_IF="(ONLY-QUERY == 'true') and (( MODULENAME == 'Orders' ) or ( MODULENAME == 'OrderItems' ) or ( MODULENAME == 'Customers' ))">
+	      <ITEMS>
+	        <ITEM NAME="NAME" FIELD="COLUMN_LIST"/>
+	        <ITEM NAME="OPERATION" FIELD="CLOSED_LIST">
+		  <ITEMS DEFAULT="String">
+		    <ITEM NAME="CONTAINS" VALUE="CONTAINS"/>
+		    <ITEM NAME="NOTCONTAINS" VALUE="NOTCONTAINS"/>
+		    <ITEM NAME="STARTSWITH" VALUE="STARTSWITH"/>
+		    <ITEM NAME="ENDWITH" VALUE="ENDWITH"/>
+		    <ITEM NAME="INSET" VALUE="INSET"/>
+		    <ITEM NAME="NOTINSET" VALUE="NOTINSET"/>
+		    <ITEM NAME="FROMRANGE" VALUE="FROMRANGE"/>
+		    <ITEM NAME="TORANGE" VALUE="TORANGE"/>
+		    <ITEM NAME="IS" VALUE="IS"/>
+		    <ITEM NAME="NOTIS" VALUE="NOTIS"/>
+		    <ITEM NAME="EQUAL" VALUE="EQUAL"/>
+		    <ITEM NAME="NOTEQUAL" VALUE="NOTEQUAL"/>
+		    <ITEM NAME="LESSTHAN" VALUE="LESSTHAN"/>
+		    <ITEM NAME="LESSTHANOREQUAL" VALUE="LESSTHANOREQUAL"/>
+		    <ITEM NAME="GREATERTHAN" VALUE="GREATERTHAN"/>
+		    <ITEM NAME="GREATERTHANOREQUAL" VALUE="GREATERTHANOREQUAL"/>
+		    <ITEM NAME="REGEXP" VALUE="REGEXP"/>
+		  </ITEMS>
+		</ITEM>
+	        <ITEM NAME="VALUE"/>
+	      </ITEMS>
+	    </PARAMETER>
+	     <PARAMETER
+	      	NAME="ID"
+	      FIELD="TEXT"
+	      NUM_ROW="5"
+	      REQUIRED="true" SHOW_IF="(ONLY-QUERY == 'true') and (( MODULENAME == 'Order' ) or ( MODULENAME == 'Customer' ) or ( MODULENAME == 'Regions' ) or ( MODULENAME == 'Countries' ) or ( MODULENAME == 'CustomerAddress' ))))">
+	    </PARAMETER>
+	    <PARAMETER
+	      	NAME="STORE-VIEW"
+	      FIELD="TEXT"
+	      NUM_ROW="5"
+	      REQUIRED="true" SHOW_IF="(ONLY-QUERY == 'true') and (( MODULENAME == 'Order' ) or ( MODULENAME == 'Customer' ))">
+	    </PARAMETER> 
+	    <PARAMETER
+	      NAME="SCHEMA"
+	      FIELD="SCHEMA_TYPE"
+	      NUM_ROW="6"
+	      REQUIRED="true"
+	    >
+	    	<TABLE IF="(MODULENAME=='Orders') or (MODULENAME=='Order')">      
+		    <COLUMN KEY="true" LENGTH="50" NAME="increment_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="parent_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="store_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="created_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="updated_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="is_active" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="customer_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="tax_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="shipping_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="discount_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="subtotal" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="grand_total" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="total_paid" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="total_refunded" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="total_qty_ordered" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="total_canceled" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="total_invoiced" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="total_online_refunded" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="total_offline_refunded" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_tax_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_shipping_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_discount_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_subtotal" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_grand_total" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_total_paid" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_total_refunded" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_total_qty_ordered" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_total_canceled" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_total_invoiced" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_total_online_refunded" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_total_offline_refunded" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="billing_address_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="billing_firstname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="billing_lastname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="shipping_address_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="shipping_firstname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="shipping_lastname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="billing_name" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="shipping_name" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="store_to_base_rate" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="store_to_order_rate" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_to_global_rate" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_to_order_rate" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="weight" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="store_name" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="remote_ip" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="status" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="state" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="applied_rule_ids" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="global_currency_code" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_currency_code" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="store_currency_code" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="order_currency_code" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="shipping_method" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="shipping_description" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="customer_email" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="customer_firstname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="customer_lastname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="quote_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="is_virtual" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="customer_group_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="customer_note_notify" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="customer_is_guest" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="email_sent" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="order_id" NULLABLE="true" TYPE="id_String"/>
+	      </TABLE>
+	      <TABLE IF="(MODULENAME=='Customers') or (MODULENAME=='Customer')">
+		    <COLUMN KEY="false" LENGTH="10" NAME="customer_id" NULLABLE="true" TYPE="id_Integer"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="created_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="updated_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="increment_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="10" NAME="store_id" NULLABLE="true" TYPE="id_Integer"/>
+		    <COLUMN KEY="false" LENGTH="10" NAME="website_id" NULLABLE="true" TYPE="id_Integer"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="created_in" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="email" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="firstname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="lastname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="10" NAME="group_id" NULLABLE="true" TYPE="id_Integer"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="password_hash" NULLABLE="true" TYPE="id_String"/>
+	      </TABLE>
+	      <TABLE IF="MODULENAME=='CustomerAddress'">
+		    <COLUMN KEY="false" LENGTH="50" NAME="customer_id" NULLABLE="true" TYPE="id_Integer"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="created_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="updated_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="increment_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="city" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="company" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="country_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="fax" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="firstname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="lastname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="middlename" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="postcode" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="prefix" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="region" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="region_id" NULLABLE="true" TYPE="id_Integer"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="street" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="suffix" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="telephone" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="is_default_billing" NULLABLE="true" TYPE="id_Boolean"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="is_default_shipping" NULLABLE="true" TYPE="id_Boolean"/>
+	      </TABLE>
+	      <TABLE IF="MODULENAME=='OrderAddress'">
+		    <COLUMN KEY="false" LENGTH="50" NAME="increment_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="parent_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="created_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="updated_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="is_active" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="address_type" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="firstname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="lastname" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="company" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="street" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="city" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="region" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="postcode" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="country_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="telephone" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="fax" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="region_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="address_id" NULLABLE="true" TYPE="id_String"/>
+	      </TABLE>
+	      <TABLE IF="MODULENAME=='OrderItems'">
+	          <COLUMN KEY="false" LENGTH="50" NAME="item_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="order_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="quote_item_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="created_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="updated_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="product_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="product_type" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="product_options" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="weight" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="is_virtual" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="sku" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="name" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="applied_rule_ids" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="free_shipping" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="is_qty_decimal" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="no_discount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="qty_canceled" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="qty_invoiced" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="qty_ordered" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="qty_refunded" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="qty_shipped" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="cost" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="price" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_price" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="original_price" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_original_price" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="tax_percent" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="tax_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_tax_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="tax_invoiced" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_tax_invoiced" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="discount_percent" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="discount_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_discount_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="discount_invoiced" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_discount_invoiced" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="amount_refunded" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_amount_refunded" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="row_total" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_row_total" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="row_invoiced" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_row_invoiced" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="row_weight" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="gift_message_available" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_tax_before_discount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="tax_before_discount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="weee_tax_applied" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="weee_tax_applied_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="weee_tax_applied_row_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_weee_tax_applied_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_weee_tax_applied_row_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="weee_tax_disposition" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="weee_tax_row_disposition" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_weee_tax_disposition" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_weee_tax_row_disposition" NULLABLE="true" TYPE="id_String"/>
+		</TABLE>
+		<TABLE IF="(MODULENAME=='OrderPayment')">
+			<COLUMN KEY="false" LENGTH="50" NAME="increment_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="parent_id" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="created_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="updated_at" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="is_active" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="amount_ordered" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="shipping_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_amount_ordered" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="base_shipping_amount" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="method" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="po_number" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="cc_type" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="cc_number_enc" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="cc_last4" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="cc_owner" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="cc_exp_month" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="cc_exp_year" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="cc_ss_start_month" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="cc_ss_start_year" NULLABLE="true" TYPE="id_String"/>
+		    <COLUMN KEY="false" LENGTH="50" NAME="payment_id" NULLABLE="true" TYPE="id_String"/>
+    	</TABLE>
+    	<TABLE IF="(MODULENAME=='OrderHistories')">
+    	    <COLUMN KEY="false" LENGTH="50" NAME="increment_id" NULLABLE="true" TYPE="id_String"/>
+			<COLUMN KEY="false" LENGTH="50" NAME="parent_id" NULLABLE="true" TYPE="id_String"/>
+			<COLUMN KEY="false" LENGTH="50" NAME="created_at" NULLABLE="true" TYPE="id_String"/>
+			<COLUMN KEY="false" LENGTH="50" NAME="updated_at" NULLABLE="true" TYPE="id_String"/>
+			<COLUMN KEY="false" LENGTH="50" NAME="is_active" NULLABLE="true" TYPE="id_String"/>
+			<COLUMN KEY="false" LENGTH="50" NAME="is_customer_notified" NULLABLE="true" TYPE="id_String"/>
+			<COLUMN KEY="false" LENGTH="50" NAME="status" NULLABLE="true" TYPE="id_String"/>
+    	</TABLE>
+
+	<TABLE IF="MODULENAME=='Products'">
+		<COLUMN KEY="false" LENGTH="50" NAME="product_id" NULLABLE="false" TYPE="id_String"/>	      
+		<COLUMN KEY="false" LENGTH="50" NAME="sku" NULLABLE="false" TYPE="id_String"/>
+		<COLUMN KEY="false" LENGTH="50" NAME="name" NULLABLE="false" TYPE="id_String"/>				    
+		<COLUMN KEY="false" LENGTH="50" NAME="set" NULLABLE="false" TYPE="id_String"/>
+		<COLUMN KEY="false" LENGTH="50" NAME="type" NULLABLE="false" TYPE="id_String"/>
+		<COLUMN KEY="false" LENGTH="50" NAME="category_ids" NULLABLE="true" TYPE="id_String"/>
+		<COLUMN KEY="false" LENGTH="50" NAME="website_ids" NULLABLE="true" TYPE="id_String"/>
+
+	</TABLE>    
+	<TABLE IF="MODULENAME=='Regions'">
+		<COLUMN KEY="false" LENGTH="50" NAME="region_id" NULLABLE="true" TYPE="id_String"/>
+	    <COLUMN KEY="false" LENGTH="50" NAME="code" NULLABLE="true" TYPE="id_String"/>
+	    <COLUMN KEY="false" LENGTH="50" NAME="name" NULLABLE="true" TYPE="id_String"/>
+	</TABLE>
+	<TABLE IF="MODULENAME=='Countries'">
+		<COLUMN KEY="false" LENGTH="50" NAME="country_id" NULLABLE="true" TYPE="id_String"/>
+		<COLUMN KEY="false" LENGTH="50" NAME="iso2_code" NULLABLE="true" TYPE="id_String"/>
+		<COLUMN KEY="false" LENGTH="50" NAME="iso3_code" NULLABLE="true" TYPE="id_String"/>
+		<COLUMN KEY="false" LENGTH="50" NAME="name" NULLABLE="true" TYPE="id_String"/>	
+	</TABLE>
+	    </PARAMETER>
+    </PARAMETERS>
+  <CODEGENERATION>
+	  <IMPORTS>
+	  	<IMPORT NAME="axis-ant" MODULE="axis-ant.jar" REQUIRED="true" />
+		<IMPORT NAME="axis" MODULE="axis.jar" REQUIRED="true" />
+		<IMPORT NAME="commons-discovery" MODULE="commons-discovery-0.2.jar" REQUIRED="true" />
+		<IMPORT NAME="commons-logging" MODULE="commons-logging-1.0.4.jar" REQUIRED="true" />
+		<IMPORT NAME="jaxrpc" MODULE="jaxrpc.jar" REQUIRED="true" />
+		<IMPORT NAME="log4j" MODULE="log4j-1.2.8.jar" REQUIRED="true" />
+		<IMPORT NAME="saaj" MODULE="saaj.jar" REQUIRED="true" />
+		<IMPORT NAME="wsdl4j" MODULE="wsdl4j-1.5.1.jar" REQUIRED="true" />
+		<IMPORT NAME="json_simple" MODULE="json_simple-1.0.jar" REQUIRED="true" />
+		<IMPORT NAME="serialized-php-parser" MODULE="serialized-php-parser-0.3.jar" REQUIRED="true" />
+		<IMPORT NAME="MagentoJConnector" MODULE="magentoJConnector.jar" REQUIRED="true" />
+	  </IMPORTS>
+   </CODEGENERATION>
+   <RETURNS>
+      <RETURN NAME="NB_LINE" TYPE="id_Integer" AVAILABILITY="AFTER"/>      
+      <RETURN NAME="MAGENTO_SESSION_ID" TYPE="id_String" AVAILABILITY="FLOW" />
+   </RETURNS>
+</COMPONENT>

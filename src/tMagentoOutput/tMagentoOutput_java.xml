@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This file is part of tMagento
+   
+   Copyright (C) 2004 - 2013 Altic sarl - http://altic.org
+  
+   contact : opensource @ altic . org
+   
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+   
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+   
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  
+   Contributors:
+    - Charly Clairmont (charly . clairmont @ altic . org) 
+    - Sebastien Vanotti (sebastien . vanotti @ altic . org)
+-->
+<COMPONENT> 
+  <HEADER 
+  		AUTHOR="Altic" 
+  		COMPATIBILITY="ALL" 
+  		DATA_AUTO_PROPAGATE="true" 
+  		PLATEFORM="ALL" 
+  		RELEASE_DATE="20090703A" 
+  		SCHEMA_AUTO_PROPAGATE="true" 
+  		SERIAL="" 
+		STARTABLE="true"
+  		STATUS="BETA" 
+  		VERSION="0.102"
+  	> 
+    <SIGNATURE/> 
+  </HEADER>
+  
+  <FAMILIES> 
+    <FAMILY>Business/MagentoCommerce</FAMILY> 
+  </FAMILIES>
+  
+  <DOCUMENTATION> 
+    <URL>http://www.altic.org</URL> 
+  </DOCUMENTATION>
+  
+  <CONNECTORS>
+    <CONNECTOR CTYPE="FLOW" MAX_INPUT="1" MAX_OUTPUT="1"/>
+    <CONNECTOR CTYPE="ITERATE" MAX_OUTPUT="0" MAX_INPUT="0"/>
+    <CONNECTOR CTYPE="SUBJOB_OK" MAX_INPUT="1" />
+    <CONNECTOR CTYPE="SUBJOB_ERROR" MAX_INPUT="1" />
+    <CONNECTOR CTYPE="COMPONENT_OK"/>
+    <CONNECTOR CTYPE="COMPONENT_ERROR"/>
+    <CONNECTOR CTYPE="RUN_IF"/>
+  </CONNECTORS>
+  
+  <PARAMETERS> 
+  	<PARAMETER
+	      NAME="USE_EXISTING_SESSION"
+	      FIELD="CHECK"
+	      NUM_ROW="1"
+	/>
+	<PARAMETER
+	      NAME="MAGE-SESSION"
+	      FIELD="COMPONENT_LIST"
+	      FILTER="tMagentoSession"
+	      NUM_ROW="1"
+	      SHOW_IF="USE_EXISTING_SESSION == 'true'"
+	/>
+	<PARAMETER
+	      NAME="MAGENTO-URL"
+	      FIELD="TEXT"
+	      NUM_ROW="2"
+	      REQUIRED="true" SHOW_IF="USE_EXISTING_SESSION == 'false'"
+	    >
+	      <DEFAULT>"http://127.0.0.1/magento"</DEFAULT>
+	 </PARAMETER>
+	    
+	  <PARAMETER
+	      NAME="USERNAME"
+	      FIELD="TEXT"
+	      NUM_ROW="3"
+	      REQUIRED="true" SHOW_IF="USE_EXISTING_SESSION == 'false'"
+	    >
+	      <DEFAULT>"admin"</DEFAULT>
+	    </PARAMETER>
+	    
+	    <PARAMETER
+	      NAME="PASSWORD"
+	      FIELD="TEXT"
+	      NUM_ROW="3"
+	      REQUIRED="true" SHOW_IF="USE_EXISTING_SESSION == 'false'"
+	    >
+	      <DEFAULT>"password"</DEFAULT>
+	    </PARAMETER>
+	    
+	    <PARAMETER NAME="MODULENAME" FIELD="CLOSED_LIST" NUM_ROW="4" REQUIRED="true">
+	      <ITEMS DEFAULT="Product">
+	      	<ITEM NAME="Customer" VALUE="Customer"/>
+	      	<ITEM NAME="CustomerAddress" VALUE="CustomerAddress"/>
+	      	<ITEM NAME="OrderComment" VALUE="OrderComment"/>
+	      	<ITEM NAME="Product" VALUE="Product"/>
+	      	<ITEM NAME="ProductImage" VALUE="ProductImage"/>
+	      	<ITEM NAME="ProductTierPrice" VALUE="ProductTierPrice"/>
+			<ITEM NAME="ProductStock" VALUE="ProductStock"/>
+			<ITEM NAME="ProductSpecialPrice" VALUE="ProductSpecialPrice"/>
+	       </ITEMS>
+	    </PARAMETER>
+	    
+	    <PARAMETER
+	      NAME="ACTION"
+	      FIELD="CLOSED_LIST"
+	      NUM_ROW="4"      
+	      REQUIRED="true">
+     		<ITEMS>
+				<ITEM NAME="create"   VALUE="create" />
+			    <ITEM NAME="update"   VALUE="update" />
+				<ITEM NAME="delete"   VALUE="delete" />
+			</ITEMS>
+        </PARAMETER>
+	        
+        <PARAMETER
+	      NAME="SCHEMA"
+	      FIELD="SCHEMA_TYPE"
+	      NUM_ROW="5"
+	      REQUIRED="true">
+	      
+	      	  <TABLE IF="MODULENAME=='Product' and (ACTION=='create' or ACTION=='update')">
+	      
+         			<COLUMN KEY="true" LENGTH="50" NAME="sku" NULLABLE="false" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="set" NULLABLE="false" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="type" NULLABLE="false" TYPE="id_String"/>
+					
+					<!-- CATEGORIES -->
+					<COLUMN KEY="false" LENGTH="50" NAME="category_1" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="category_2" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="category_3" NULLABLE="true" TYPE="id_String"/>
+					
+					<!-- WEBSITES -->
+					<COLUMN KEY="false" LENGTH="50" NAME="website_1" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="website_2" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="website_3" NULLABLE="true" TYPE="id_String"/>	
+									
+					<COLUMN KEY="false" LENGTH="50" NAME="name" NULLABLE="false" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="description" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="short_description" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="weight" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="status" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="url_key" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="url_path" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="visibility" NULLABLE="true" TYPE="id_String"/>
+					
+					<!-- CATEGORIES ID -->
+					<COLUMN KEY="false" LENGTH="50" NAME="categoryId_1" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="categoryId_2" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="categoryId_3" NULLABLE="true" TYPE="id_String"/>					
+					<COLUMN KEY="false" LENGTH="50" NAME="has_options" NULLABLE="true" TYPE="id_String"/>
+					
+					<COLUMN KEY="false" LENGTH="50" NAME="gift_message_available" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="price" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="special_price" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="special_from_date" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="special_to_date" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="tax_class_id" NULLABLE="true" TYPE="id_String"/>
+					<!-- TIER PRICE -->
+					<COLUMN KEY="false" LENGTH="50" NAME="tier_price_1" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="tier_price_2" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="tier_price_3" NULLABLE="true" TYPE="id_String"/>
+					
+					<COLUMN KEY="false" LENGTH="50" NAME="meta_title" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="meta_keyword" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="meta_description" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="custom_design" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="custom_layout_update" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="options_container" NULLABLE="true" TYPE="id_String"/>
+					
+					<!-- ATTRIBUTES -->
+					<COLUMN KEY="false" LENGTH="50" NAME="att_attribute_1" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="att_attribute_2" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="att_attribute_3" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="att_attribute_4" NULLABLE="true" TYPE="id_String"/>
+					
+					<!--STOCK -->
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_is_in_stock" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_manage_stock" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_use_config_manage_stock" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_min_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_use_config_min_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_min_sale_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_use_config_min_sale_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_max_sale_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_use_config_max_sale_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_is_qty_decimal" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_backorders" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_use_config_backorders" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_notify_stock_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="stock_use_config_notify_stock_qty" NULLABLE="true" TYPE="id_String"/>
+				    
+	      	  </TABLE>
+	      	  <TABLE IF="MODULENAME=='Product' and ACTION=='delete'">	      
+         			<COLUMN KEY="true" LENGTH="50" NAME="sku" NULLABLE="false" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="name" NULLABLE="true" TYPE="id_String"/>
+			  </TABLE>
+			  
+			  <TABLE IF="MODULENAME=='ProductStock' and ACTION=='update'">	      
+					<COLUMN KEY="true" LENGTH="50" NAME="sku" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="is_in_stock" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="manage_stock" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="use_config_manage_stock" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="min_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="use_config_min_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="min_sale_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="use_config_min_sale_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="max_sale_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="use_config_max_sale_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="is_qty_decimal" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="backorders" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="use_config_backorders" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="notify_stock_qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="use_config_notify_stock_qty" NULLABLE="true" TYPE="id_String"/>
+			  </TABLE>
+			  
+			  <TABLE IF="MODULENAME=='ProductImage' and (ACTION=='create' or ACTION=='update')">
+			  		<COLUMN KEY="true" LENGTH="30" NAME="sku" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="255" NAME="uri" NULLABLE="true" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="mime" NULLABLE="true" TYPE="id_String"/>
+		    		<COLUMN KEY="false" LENGTH="50" NAME="name" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="label" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="position" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="types" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="exclude" NULLABLE="true" TYPE="id_String"/>
+			  </TABLE>
+			  <TABLE IF="MODULENAME=='ProductImage' and ACTION=='delete'">	      
+         			<COLUMN KEY="true" LENGTH="11" NAME="id" NULLABLE="false" TYPE="id_String"/>
+			  </TABLE>
+			  
+			  <TABLE IF="MODULENAME=='Customer' and (ACTION=='create' or ACTION=='update')">	
+			  		<COLUMN KEY="true" LENGTH="30" NAME="id" NULLABLE="false" TYPE="id_String"/>      
+					<COLUMN KEY="false" LENGTH="255" NAME="email" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="firstname" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="100" NAME="lastname" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="20" NAME="password" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="10" NAME="website_id" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="10" NAME="store_id" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="10" NAME="group_id" NULLABLE="false" TYPE="id_String"/>
+			  </TABLE>
+			  <TABLE IF="MODULENAME=='Customer' and ACTION=='delete'">	      
+         			<COLUMN KEY="true" LENGTH="50" NAME="customer_id" NULLABLE="false" TYPE="id_String"/>
+			  </TABLE>
+			  
+			  <TABLE IF="MODULENAME=='CustomerAddress' and (ACTION=='create' or ACTION=='update')">
+			   		<COLUMN KEY="true" LENGTH="30" NAME="id" NULLABLE="true" TYPE="id_String"/>	      
+			   		<COLUMN KEY="false" LENGTH="50" NAME="customer_id" NULLABLE="true" TYPE="id_String"/>	      
+					<COLUMN KEY="false" LENGTH="50" NAME="city" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="company" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="country_id" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="fax" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="firstname" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="lastname" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="middlename" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="postcode" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="prefix" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="region_id" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="region" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="street" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="suffix" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="telephone" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="50" NAME="is_default_billing" NULLABLE="false" TYPE="id_String" />
+				    <COLUMN KEY="false" LENGTH="50" NAME="is_default_shipping" NULLABLE="false" TYPE="id_String"/>
+			  </TABLE>
+			  <TABLE IF="MODULENAME=='CustomerAddress' and ACTION=='delete'">	      
+         			<COLUMN KEY="true" LENGTH="50" NAME="customerAddress_id" NULLABLE="false" TYPE="id_String"/>
+					<COLUMN KEY="false" LENGTH="50" NAME="name" NULLABLE="true" TYPE="id_String"/>
+			  </TABLE>
+			<TABLE IF="MODULENAME=='OrderComment' and (ACTION=='create' or ACTION=='update')">	      
+         			<COLUMN KEY="true" LENGTH="15" NAME="increment_id" NULLABLE="false" TYPE="id_String"/>
+			    	<COLUMN KEY="false" LENGTH="20" NAME="status" NULLABLE="false" TYPE="id_String"/>
+				<COLUMN KEY="false" LENGTH="255" NAME="comment" NULLABLE="true" TYPE="id_String"/>
+				<COLUMN KEY="false" LENGTH="6" NAME="notify" NULLABLE="true" TYPE="id_String"/>
+			  </TABLE>  
+			  
+			  <TABLE READONLY="true" IF="MODULENAME=='ProductTierPrice' and (ACTION=='update')">
+			  		<COLUMN KEY="true" LENGTH="30" NAME="sku" NULLABLE="false" TYPE="id_String"/>
+			      	<COLUMN KEY="false" LENGTH="10" NAME="customer_group_id" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="30" NAME="website" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="10" NAME="qty" NULLABLE="true" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="10" NAME="price" NULLABLE="false" TYPE="id_String"/>
+			  </TABLE>
+			 <TABLE READONLY="true" IF="MODULENAME=='ProductSpecialPrice' and (ACTION=='update')">
+			  		<COLUMN KEY="true" LENGTH="30" NAME="sku" NULLABLE="false" TYPE="id_String"/>
+			      	<COLUMN KEY="false" LENGTH="30" NAME="store_view" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="10" NAME="special_price" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="10" NAME="special_from_date" NULLABLE="false" TYPE="id_String"/>
+				    <COLUMN KEY="false" LENGTH="10" NAME="special_to_date" NULLABLE="true" TYPE="id_String"/>
+			  </TABLE>
+        </PARAMETER>       
+        
+  </PARAMETERS>
+  
+  <ADVANCED_PARAMETERS> 
+    <PARAMETER FIELD="TEXT" NAME="PROPERTYADVANCED" NUM_ROW="1"/> 
+  </ADVANCED_PARAMETERS>
+    
+  <CODEGENERATION> 
+    <IMPORTS>
+	  	<IMPORT NAME="axis-ant" MODULE="axis-ant.jar" REQUIRED="true" />
+		<IMPORT NAME="axis" MODULE="axis.jar" REQUIRED="true" />
+		<IMPORT NAME="commons-discovery" MODULE="commons-discovery-0.2.jar" REQUIRED="true" />
+		<IMPORT NAME="commons-logging" MODULE="commons-logging-1.0.4.jar" REQUIRED="true" />
+		<IMPORT NAME="jaxrpc" MODULE="jaxrpc.jar" REQUIRED="true" />
+		<IMPORT NAME="log4j" MODULE="log4j-1.2.8.jar" REQUIRED="true" />
+		<IMPORT NAME="saaj" MODULE="saaj.jar" REQUIRED="true" />
+		<IMPORT NAME="wsdl4j" MODULE="wsdl4j-1.5.1.jar" REQUIRED="true" />
+		<IMPORT NAME="MagentoJConnector" MODULE="magentoJConnector.jar" REQUIRED="true" />
+	</IMPORTS>
+  </CODEGENERATION>  
+  <RETURNS> 
+    <RETURN AVAILABILITY="AFTER" NAME="NB_LINE" TYPE="id_Integer"/> 
+    <RETURN AVAILABILITY="AFTER" NAME="ID_RESULT" TYPE="id_Integer"/> 
+  </RETURNS> 
+</COMPONENT>

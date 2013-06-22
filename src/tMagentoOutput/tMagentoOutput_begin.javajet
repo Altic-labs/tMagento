@@ -1,0 +1,103 @@
+<%@ jet 
+imports="
+    	org.talend.core.model.process.INode 
+    	org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.metadata.IMetadataTable 
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.EConnectionType
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType		
+		java.util.List
+		java.util.Map
+		org.talend.core.model.process.IConnectionCategory
+		java.util.HashMap
+		"
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode)codeGenArgument.getArgument();
+    String cid = node.getUniqueName();	
+	
+	String url = ElementParameterParser.getValue(node, "__MAGENTO-URL__");
+
+	String username = ElementParameterParser.getValue(node, "__USERNAME__");
+	String password = ElementParameterParser.getValue(node, "__PASSWORD__");
+
+	//String storeView = ElementParameterParser.getValue(node, "__STORE-VIEW__");
+
+	String module = ElementParameterParser.getValue(node, "__MODULENAME__");
+	String action = ElementParameterParser.getValue(node, "__ACTION__");
+	
+	String useExistingSession = ElementParameterParser.getValue(node,"__USE_EXISTING_SESSION__");
+	
+	List< ? extends IConnection> conns = node.getIncomingConnections();
+	
+	List<IMetadataTable> metadatas = node.getMetadataList();
+	if ((metadatas!=null)&&(metadatas.size()>0)) {
+		IMetadataTable metadata = metadatas.get(0);
+		if (metadata!=null) { 
+%>
+		int nb_line_<%=cid%> = 0;
+		int id_result_<%=cid%> = 0;
+		java.util.HashMap<String, String> outputObject_<%=cid%>  = new java.util.HashMap<String, String>();
+		
+<%
+		if ("ProductTierPrice".equals(module) && "update".equals(action)) {
+%>
+		String tierprice<%=cid%> = new String();
+<%
+		}
+%>
+		
+<%			
+		if(useExistingSession.equals("true")) {
+			String session = ElementParameterParser.getValue(node,"__MAGE-SESSION__");
+			String sess = "magentoService" + session;
+%>
+			// retrive a session & service <%=sess%>
+			org.altic.magentojconnector.service.InputOperation tmpInMagentoService<%=cid%> = (org.altic.magentojconnector.service.InputOperation) globalMap.get("<%=sess%>");
+			org.altic.magentojconnector.service.Session magentoSession<%=cid%> = tmpInMagentoService<%=cid%>.getInSession();
+			String magentoSessionId<%=cid%> = magentoSession<%=cid%>.getSession();
+			globalMap.put("_MAGENTO_SESSION_ID",magentoSessionId<%=cid%>);			
+			
+			// create service
+			org.altic.magentojconnector.service.OutputOperation magentoService<%=cid%> = new org.altic.magentojconnector.service.impl.OutputOperationImpl(
+			magentoSession<%=cid%>
+			);
+			
+			tmpInMagentoService<%=cid%> = null;
+					
+<%
+		} else {
+%>
+			org.altic.magentojconnector.service.Session magentoSession<%=cid%> = new org.altic.magentojconnector.service.impl.SessionImpl(
+				<%=url%>
+			);
+			
+			// open a session
+			String magentoSessionId<%=cid%> = (String)globalMap.get("_MAGENTO_SESSION_ID"); 
+			if (magentoSessionId<%=cid%> == null) {
+			
+				magentoSessionId<%=cid%>  = magentoSession<%=cid%>.open(<%=username%>,<%=password%>);		
+				globalMap.put("_MAGENTO_SESSION_ID",magentoSessionId<%=cid%>); 
+				System.out.println("A connection to Magento is now open");
+				System.out.println("The session id is : " + magentoSessionId<%=cid%>);
+			}
+			else {
+				magentoSession<%=cid%>.setSession(magentoSessionId<%=cid%>);
+				System.out.println("Using the session id : " + magentoSessionId<%=cid%>);
+			}
+			
+			// create service
+			org.altic.magentojconnector.service.OutputOperation magentoService<%=cid%> = new org.altic.magentojconnector.service.impl.OutputOperationImpl(
+			magentoSession<%=cid%>
+		);
+<%
+		}// end iff useExistingSession
+%>
+<%
+}}
+%>
+
